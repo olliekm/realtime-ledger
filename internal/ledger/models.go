@@ -28,6 +28,18 @@ type Entry struct {
 	Metadata    map[string]string
 }
 
+type JournalID string
+
+// Journal is a batch of entries (journal entry).
+// This is what clients POST.
+type Journal struct {
+	ID          JournalID
+	Entries     []Entry
+	Metadata    map[string]string
+	EffectiveAt time.Time
+	CreatedAt   time.Time
+}
+
 // BalanceSnapshot represents the balance of an account at a specific point in time.
 type BalanceSnapshot struct {
 	AccountID AccountID
