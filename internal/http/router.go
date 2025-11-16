@@ -4,22 +4,24 @@ import (
 	"net/http"
 
 	"github.com/gorilla/mux"
-	handlers "github.com/olliekm/realtime-ledger/internal/http/handlers"
 )
 
-func NewRouter() http.Handler {
+func NewRouter(h *Handlers) http.Handler {
 	r := mux.NewRouter()
-	amw := Auth{tokenUsers: make(map[string]string)}
+	api := r.PathPrefix("/api/v1").Subrouter()
+	amw := &Auth{tokenUsers: make(map[string]string)}
 	amw.Populate()
 
-	r.Use(amw.Middleware)
+	api.Use(amw.Middleware)
 
-	r.HandleFunc("/v1/accounts", handlers.CreateAccount).Methods("POST")
-	r.HandleFunc("/v1/accounts/{id}", handlers.GetAccount).Methods("GET")
-	r.HandleFunc("/v1/accounts/{id}/balance", handlers.GetBalance).Methods("GET")
-	r.HandleFunc("/v1/accounts/{id}/entires", handlers.GetEntries).Methods("GET")
+	api.HandleFunc("/accounts", h.CreateAccount).Methods("POST")
+	api.HandleFunc("/accounts/{id}", h.GetAccount).Methods("GET")
+	api.HandleFunc("/accounts/{id}/balance", h.GetBalance).Methods("GET")
+	api.HandleFunc("/accounts/{id}/entires", h.GetEntries).Methods("GET")
 
-	r.HandleFunc("/v1/journals", handle.PostJournal).Methods("POST")
+	api.HandleFunc("/journals", h.PostJournal).Methods("POST") // post a journal batch
+	api.HandleFunc("/entries", h.ListEntries).Methods("GET")
+	r.HandleFunc("/healthz", h.HealthCheck).Methods("GET")
 
 	return r
 
