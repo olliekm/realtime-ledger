@@ -9,7 +9,7 @@ type EntryID string
 type Account struct {
 	ID        AccountID
 	Name      string
-	Currency  Curency
+	Currency  Currency
 	CreatedAt time.Time
 }
 

@@ -24,7 +24,7 @@ func NewInMemoryLedger() *Ledger {
 	}
 }
 
-func (l *Ledger) CreateAccount(name string, currency Curency) (*Account, error) {
+func (l *Ledger) CreateAccount(name string, currency Currency) (*Account, error) {
 	l.mu.Lock()
 	defer l.mu.Unlock()
 
@@ -38,6 +38,17 @@ func (l *Ledger) CreateAccount(name string, currency Curency) (*Account, error) 
 
 	l.accounts[id] = acct
 	l.balances[id] = NewMoney(0, currency)
+	return acct, nil
+}
+
+func (l *Ledger) GetAccount(id AccountID) (*Account, error) {
+	l.mu.RLock()
+	defer l.mu.RUnlock()
+
+	acct, ok := l.accounts[id]
+	if !ok {
+		return nil, ErrAccountNotFound
+	}
 	return acct, nil
 }
 
@@ -73,8 +84,11 @@ func (l *Ledger) PostEntry(ctx context.Context, e *Entry) (*Entry, error) {
 
 	// prospective balance
 	newBalances := make(map[AccountID]Money, len(l.balances))
+	for id, bal := range l.balances {
+		newBalances[id] = bal
+	}
 	for _, p := range e.Postings {
-		current := l.balances[p.AccountID]
+		current := newBalances[p.AccountID]
 		newBalance, err := current.Add(p.Amount)
 		if err != nil {
 			return nil, err
@@ -109,12 +123,32 @@ func (l *Ledger) PostEntry(ctx context.Context, e *Entry) (*Entry, error) {
 	return e, nil
 }
 
+func (l *Ledger) ListEntries(accountID AccountID) []Entry {
+	l.mu.RLock()
+	defer l.mu.RUnlock()
+
+	var entries []Entry
+	for _, e := range l.entries {
+		if accountID == "" {
+			entries = append(entries, *e)
+			continue
+		}
+		for _, p := range e.Postings {
+			if p.AccountID == accountID {
+				entries = append(entries, *e)
+				break
+			}
+		}
+	}
+	return entries
+}
+
 func validateEntry(e *Entry) error {
 	if len(e.Postings) == 0 {
 		return ErrEmptyPostings
 	}
 
-	sumByCurrency := make(map[Curency]int64)
+	sumByCurrency := make(map[Currency]int64)
 	for _, p := range e.Postings {
 		if p.Amount.isZero() {
 			return ErrZeroAmountPosting

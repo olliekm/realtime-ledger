@@ -2,20 +2,20 @@ package ledger
 
 import "fmt"
 
-type Curency string
+type Currency string
 
 const (
-	USD Curency = "USD"
-	EUR Curency = "EUR"
-	GBP Curency = "GBP"
+	USD Currency = "USD"
+	EUR Currency = "EUR"
+	GBP Currency = "GBP"
 )
 
 type Money struct {
 	Amount   int64
-	Currency Curency
+	Currency Currency
 }
 
-func NewMoney(amount int64, c Curency) Money {
+func NewMoney(amount int64, c Currency) Money {
 	return Money{Amount: amount, Currency: c}
 }
 

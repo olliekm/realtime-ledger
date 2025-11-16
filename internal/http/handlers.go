@@ -1,10 +1,20 @@
 package api
 
+import (
+	"net/http"
+
+	"github.com/olliekm/realtime-ledger/internal/service"
+)
+
 type Handlers struct {
-	// Add any dependencies your handlers might need, e.g., database connections
+	ledgerSvc service.LedgerService
 }
 
-// You can define methods on Handlers for each of your HTTP endpoints
-func NewHandlers() *Handlers {
-	return &Handlers{}
+func NewHandlers(ledgerSvc service.LedgerService) *Handlers {
+	return &Handlers{ledgerSvc: ledgerSvc}
+}
+
+func (h *Handlers) HealthCheck(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+	_, _ = w.Write([]byte(`{"status":"ok"}`))
 }

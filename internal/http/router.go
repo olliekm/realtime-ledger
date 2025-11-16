@@ -17,7 +17,7 @@ func NewRouter(h *Handlers) http.Handler {
 	api.HandleFunc("/accounts", h.CreateAccount).Methods("POST")
 	api.HandleFunc("/accounts/{id}", h.GetAccount).Methods("GET")
 	api.HandleFunc("/accounts/{id}/balance", h.GetBalance).Methods("GET")
-	api.HandleFunc("/accounts/{id}/entires", h.GetEntries).Methods("GET")
+	api.HandleFunc("/accounts/{id}/entries", h.GetEntries).Methods("GET")
 
 	api.HandleFunc("/journals", h.PostJournal).Methods("POST") // post a journal batch
 	api.HandleFunc("/entries", h.ListEntries).Methods("GET")
